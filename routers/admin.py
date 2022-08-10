@@ -13,5 +13,5 @@ async def run_sql(request: Request):
 
 @router.get("/reload_cache")
 async def reload_cache(request: Request):
-    await request.app.state.cache.reload()
+    await request.app.state.cache.load(request.app.state.db)
     return GeneralResponse(message="Cache reloaded")
