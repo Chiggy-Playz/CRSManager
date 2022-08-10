@@ -52,3 +52,20 @@ async def create_buyer(request: Request, buyer: BuyerIn):
     buyer_details["id"] = buyer_id
     request.app.state.cache.buyers[buyer.name] = BuyerDB(**buyer_details)
     return GeneralResponse(message="Buyer created")
+
+@router.delete(
+    "/buyers/{id}",
+    status_code=200,
+    response_model=GeneralResponse,
+)
+async def delete_buyer(request: Request, id: int):
+    buyer = [buyer for buyer in request.app.state.cache.buyers.values() if buyer.id == id]
+    if not buyer:
+        raise HTTPException(status_code=404, detail="Buyer not found")
+    buyer = buyer[0]
+    await request.app.state.db.execute(
+        """DELETE FROM buyers WHERE id = $1;""",
+        buyer.id,
+    )
+    del request.app.state.cache.buyers[buyer.name]
+    return GeneralResponse(message="Buyer deleted")
