@@ -28,7 +28,7 @@ async def app_startup():
 
     app.state.db = await asyncpg.create_pool(**config["DB Info"])
     app.state.cache = Cache()
-    await app.state.cache.load_cache(app.state.db)
+    await app.state.cache.load(app.state.db)
 
 
 @app.get("/", response_model=GeneralResponse)

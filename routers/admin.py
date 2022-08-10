@@ -10,3 +10,8 @@ async def run_sql(request: Request):
     method = request.app.state.db.fetch
     values = await method(query)
     return GeneralResponse(message="SQL executed")
+
+@router.get("/reload_cache")
+async def reload_cache(request: Request):
+    await request.app.state.cache.reload()
+    return GeneralResponse(message="Cache reloaded")
