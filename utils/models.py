@@ -22,6 +22,7 @@ class BuyerDB(BaseModel):
 
 class ProductDB(BaseModel):
     challan_id: int
+    name: str
     description: str
     quantity: int
     serial_number: str
@@ -29,12 +30,16 @@ class ProductDB(BaseModel):
 
 class ChallanDB(BaseModel):
     id: int
-    number: int
+    challan_number: int
     session: str
     buyer_id: int
-    products: List[ProductDB]
     received: bool
     delivered_by: str
     vehicle_number: str
     created_at: datetime.datetime
-    deleted: bool
+    cancelled: bool
+    digitally_signed: bool
+
+class ChallanCache(ChallanDB):
+    buyer: BuyerDB
+    products: List[ProductDB]
