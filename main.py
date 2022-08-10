@@ -6,7 +6,8 @@ import toml
 
 from utils.classes import Cache
 
-from routers import delivery_challan
+from routers import delivery_challan, admin
+from utils.models import GeneralResponse
 
 with open("config.toml", "r") as f:
     config = toml.load(f)
@@ -30,9 +31,10 @@ async def app_startup():
     await app.state.cache.load_cache(app.state.db)
 
 
-@app.get("/")
-async def root():
-    return {"message": "Hello World"}
+@app.get("/", response_model=GeneralResponse)
+async def ping():
+    return GeneralResponse(message="Pong!")
 
 
 app.include_router(delivery_challan.router)
+app.include_router(admin.router)

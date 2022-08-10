@@ -5,6 +5,10 @@ from typing import List, Optional
 from pydantic import BaseModel
 
 
+class GeneralResponse(BaseModel):
+
+    message: str
+
 class BuyerIn(BaseModel):
     name: str
     address: str
