@@ -27,8 +27,8 @@ CREATE TABLE IF NOT EXISTS products (
     challan_id SERIAL,
     name TEXT NOT NULL,
     quantity INTEGER NOT NULL,
-    description TEXT NOT NULL,
-    serial_number TEXT NOT NULL,
+    description TEXT,
+    serial_number TEXT,
     FOREIGN KEY (challan_id) REFERENCES challans (id),
-    PRIMARY KEY(challan_id, serial_number)
+    PRIMARY KEY(challan_id, name)
 );
