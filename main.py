@@ -18,9 +18,7 @@ app = FastAPI(
     description="CRS Manager's backend server",
     redoc_url="/docs",
     docs_url=None,
-    servers = [
-        {"url":"http://localhost:3330", "description":"Local"}
-    ]
+    servers=[{"url": "http://localhost:3330", "description": "Local"}],
 )
 
 

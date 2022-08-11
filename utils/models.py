@@ -9,6 +9,7 @@ class GeneralResponse(BaseModel):
 
     message: str
 
+
 class BuyerIn(BaseModel):
     name: str
     address: str
@@ -43,6 +44,7 @@ class ChallanDB(BaseModel):
     created_at: datetime.datetime
     cancelled: bool
     digitally_signed: bool
+
 
 class ChallanCache(ChallanDB):
     buyer: BuyerDB

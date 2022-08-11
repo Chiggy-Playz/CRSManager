@@ -13,7 +13,7 @@ router = APIRouter(prefix="/delivery_challan", tags=["Delivery Challan"])
     response_model=List[BuyerDB],
 )
 async def get_buyers(request: Request, search_term: str = ""):
-    
+
     buyers = []
     for name in request.app.state.cache.buyers:
         if search_term.lower() in name.lower():
@@ -53,6 +53,7 @@ async def create_buyer(request: Request, buyer: BuyerIn):
     buyer_details["id"] = buyer_id
     request.app.state.cache.buyers[buyer.name] = BuyerDB(**buyer_details)
     return GeneralResponse(message="Buyer created")
+
 
 @router.delete(
     "/buyers/{id}",
