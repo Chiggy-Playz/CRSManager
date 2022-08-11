@@ -13,7 +13,7 @@ router = APIRouter(prefix="/delivery_challan", tags=["Delivery Challan"])
     response_model=List[BuyerDB],
 )
 async def get_buyers(request: Request, search_term: str = ""):
-
+    """Get all buyers"""
     buyers = []
     for name in request.app.state.cache.buyers:
         if search_term.lower() in name.lower():
@@ -23,10 +23,15 @@ async def get_buyers(request: Request, search_term: str = ""):
 
 @router.get(
     "/buyers/{id}",
+    responses={
+        200: {"model": BuyerDB},
+        404: {"detail": "Buyer not found"},
+    },
     status_code=200,
     response_model=BuyerDB,
 )
 async def get_buyer(request: Request, id: int):
+    """Get a buyer by its id"""
     buyer = [buyer for buyer in request.app.state.cache.buyers.values() if buyer.id == id]
     if not buyer:
         raise HTTPException(status_code=404, detail="Buyer not found")
@@ -35,10 +40,15 @@ async def get_buyer(request: Request, id: int):
 
 @router.post(
     "/buyers",
+    responses={
+        201: {"model": GeneralResponse},
+        400: {"detail": "Buyer already exists"},
+    },
     status_code=201,
     response_model=GeneralResponse,
 )
 async def create_buyer(request: Request, buyer: BuyerIn):
+    """Create a new buyer"""
     try:
         buyer_id = await request.app.state.db.fetchval(
             """INSERT INTO buyers(name, address, state, gst) VALUES ($1, $2, $3, $4) RETURNING id;""",
@@ -57,10 +67,15 @@ async def create_buyer(request: Request, buyer: BuyerIn):
 
 @router.delete(
     "/buyers/{id}",
+    responses={
+        200: {"model": GeneralResponse},
+        404: {"detail": "Buyer not found"},
+    },
     status_code=200,
     response_model=GeneralResponse,
 )
 async def delete_buyer(request: Request, id: int):
+    """Delete a buyer"""
     buyer = [buyer for buyer in request.app.state.cache.buyers.values() if buyer.id == id]
     if not buyer:
         raise HTTPException(status_code=404, detail="Buyer not found")
@@ -75,10 +90,15 @@ async def delete_buyer(request: Request, id: int):
 
 @router.put(
     "/buyers/{id}",
+    responses={
+        200: {"model": GeneralResponse},
+        404: {"detail": "Buyer not found"},
+    },
     status_code=200,
     response_model=GeneralResponse,
 )
 async def update_buyer(request: Request, id: int, input_buyer: BuyerIn):
+    """Update a buyer"""
     buyer = [buyer for buyer in request.app.state.cache.buyers.values() if buyer.id == id]
     if not buyer:
         raise HTTPException(status_code=404, detail="Buyer not found")
