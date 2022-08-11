@@ -13,6 +13,7 @@ router = APIRouter(prefix="/delivery_challan", tags=["Delivery Challan"])
     response_model=List[BuyerDB],
 )
 async def get_buyers(request: Request, search_term: str = ""):
+    
     buyers = []
     for name in request.app.state.cache.buyers:
         if search_term.lower() in name.lower():
@@ -69,3 +70,29 @@ async def delete_buyer(request: Request, id: int):
     )
     del request.app.state.cache.buyers[buyer.name]
     return GeneralResponse(message="Buyer deleted")
+
+
+@router.put(
+    "/buyers/{id}",
+    status_code=200,
+    response_model=GeneralResponse,
+)
+async def update_buyer(request: Request, id: int, input_buyer: BuyerIn):
+    buyer = [buyer for buyer in request.app.state.cache.buyers.values() if buyer.id == id]
+    if not buyer:
+        raise HTTPException(status_code=404, detail="Buyer not found")
+    buyer = buyer[0]
+    await request.app.state.db.execute(
+        """UPDATE buyers SET name = $1, address = $2, state = $3, gst = $4 WHERE id = $5;""",
+        input_buyer.name,
+        input_buyer.address,
+        input_buyer.state,
+        input_buyer.gst,
+        id,
+    )
+    new_buyer_info = dict(input_buyer)
+    new_buyer_info["id"] = id
+    del request.app.state.cache.buyers[buyer.name]
+    request.app.state.cache.buyers[input_buyer.name] = BuyerDB(**new_buyer_info)
+
+    return GeneralResponse(message="Buyer updated")

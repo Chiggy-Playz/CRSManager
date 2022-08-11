@@ -12,8 +12,6 @@ from utils.models import GeneralResponse
 with open("config.toml", "r") as f:
     config = toml.load(f)
 
-app = FastAPI()
-
 app = FastAPI(
     title="CRSManager",
     version="0.1.0",
