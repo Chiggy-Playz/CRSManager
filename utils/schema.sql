@@ -7,8 +7,8 @@ CREATE TABLE IF NOT EXISTS buyers (
 );
 
 CREATE TABLE IF NOT EXISTS challans(
-    id SERIAL PRIMARY KEY,
-    challan_number INT NOT NULL,
+    id SERIAL UNIQUE,
+    number INT NOT NULL,
     session TEXT NOT NULL,
     created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT (NOW() AT TIME ZONE 'UTC'),
     buyer_id INT NOT NULL,
@@ -20,6 +20,7 @@ CREATE TABLE IF NOT EXISTS challans(
     received BOOLEAN NOT NULL DEFAULT FALSE,
     digitally_signed BOOLEAN NOT NULL DEFAULT FALSE,
     
+    PRIMARY KEY(number, session),
     FOREIGN KEY (buyer_id) REFERENCES buyers (id)
 );
 
