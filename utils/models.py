@@ -25,27 +25,40 @@ class BuyerDB(BaseModel):
     gst: Optional[str] = None
 
 
-class ProductDB(BaseModel):
-    challan_id: int
+class ProductIn(BaseModel):
     name: str
-    description: str
+    description: Optional[str] = None
     quantity: int
-    serial_number: str
+    serial_number: Optional[str] = None
 
+class ProductDB(ProductIn):
+    challan_id: int
 
 class ChallanDB(BaseModel):
     id: int
-    challan_number: int
+    number: int
     session: str
     buyer_id: int
-    received: bool
+    received: bool = False
     delivered_by: str
     vehicle_number: str
     created_at: datetime.datetime
-    cancelled: bool
+    cancelled: bool = False
     digitally_signed: bool
-
 
 class ChallanCache(ChallanDB):
     buyer: BuyerDB
     products: List[ProductDB]
+
+class ChallanIn(BaseModel):
+    number: int
+    session: str
+    buyer_id: int
+    delivered_by: str
+    vehicle_number: str
+    digitally_signed: bool
+    products: List[ProductIn]
+
+class NewChallanInfo(BaseModel):
+    number: int
+    session: str
