@@ -202,11 +202,11 @@ async def create_challan(request: Request, challan: ChallanIn):
     )
     await request.app.state.db.executemany(
         """
-        INSERT INTO products(challan_id, name, description, quantity, serial_number)
+        INSERT INTO products(challan_id, description, quantity, comments, serial_number)
         VALUES ($1, $2, $3, $4, $5);
     """,
         [
-            (inserted_challan["id"], product.name, product.description, product.quantity, product.serial_number,)
+            (inserted_challan["id"], product.description, product.quantity, product.comments ,product.serial_number,)
             for product in challan.products
         ],
     )

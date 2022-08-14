@@ -26,9 +26,9 @@ class BuyerDB(BaseModel):
 
 
 class ProductIn(BaseModel):
-    name: str
-    description: Optional[str] = None
+    description: str
     quantity: int
+    comments: Optional[str] = None
     serial_number: Optional[str] = None
 
 class ProductDB(ProductIn):

@@ -26,10 +26,10 @@ CREATE TABLE IF NOT EXISTS challans(
 
 CREATE TABLE IF NOT EXISTS products (
     challan_id SERIAL,
-    name TEXT NOT NULL,
+    description TEXT NOT NULL,
     quantity INTEGER NOT NULL,
-    description TEXT,
+    comments TEXT,
     serial_number TEXT,
     FOREIGN KEY (challan_id) REFERENCES challans (id),
-    PRIMARY KEY(challan_id, name)
+    PRIMARY KEY(challan_id, description)
 );
