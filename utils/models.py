@@ -59,6 +59,17 @@ class ChallanIn(BaseModel):
     digitally_signed: bool
     products: List[ProductIn]
 
+class ChallanUpdate(BaseModel):
+    number: Optional[int] = None
+    session: Optional[str] = None
+    buyer_id: Optional[int] = None
+    received: Optional[bool] = None
+    delivered_by: Optional[str] = None
+    vehicle_number: Optional[str] = None
+    digitally_signed: Optional[bool] = None
+    cancelled: Optional[bool] = None
+    products: Optional[List[ProductIn]] = None
+
 class NewChallanInfo(BaseModel):
     number: int
     session: str

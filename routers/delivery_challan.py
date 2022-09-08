@@ -9,6 +9,7 @@ from utils.models import (
     ProductDB,
     ChallanCache,
     ChallanIn,
+    ChallanUpdate,
     NewChallanInfo,
     GeneralResponse,
 )
@@ -170,7 +171,9 @@ async def get_new_challan_info(request: Request):
     else:
         session = f"{now.year - 1}-{now.year}"
 
-    challan_number = await request.app.state.db.fetchval("SELECT COUNT(*) FROM challans WHERE session = $1;", session)
+    challan_number = (
+        await request.app.state.db.fetchval("SELECT MAX(number) FROM challans WHERE session = $1;", session)
+    ) or 0
     challan_number += 1
     return NewChallanInfo(
         session=session,
@@ -190,23 +193,32 @@ async def create_challan(request: Request, challan: ChallanIn):
     if not buyer:
         raise HTTPException(status_code=404, detail="Buyer not found")
     buyer = buyer[0]
-    inserted_challan = await request.app.state.db.fetchrow(
-        """INSERT INTO challans(number, session, buyer_id, delivered_by, vehicle_number, digitally_signed) 
-        VALUES ($1, $2, $3, $4, $5, $6) RETURNING *;""",
-        challan.number,
-        challan.session,
-        challan.buyer_id,
-        challan.delivered_by,
-        challan.vehicle_number,
-        challan.digitally_signed,
-    )
+    try:
+        inserted_challan = await request.app.state.db.fetchrow(
+            """INSERT INTO challans(number, session, buyer_id, delivered_by, vehicle_number, digitally_signed) 
+            VALUES ($1, $2, $3, $4, $5, $6) RETURNING *;""",
+            challan.number,
+            challan.session,
+            challan.buyer_id,
+            challan.delivered_by,
+            challan.vehicle_number,
+            challan.digitally_signed,
+        )
+    except asyncpg.UniqueViolationError:
+        raise HTTPException(status_code=400, detail="A challan of same number and session exists.")
     await request.app.state.db.executemany(
         """
         INSERT INTO products(challan_id, description, quantity, comments, serial_number)
         VALUES ($1, $2, $3, $4, $5);
     """,
         [
-            (inserted_challan["id"], product.description, product.quantity, product.comments ,product.serial_number,)
+            (
+                inserted_challan["id"],
+                product.description,
+                product.quantity,
+                product.comments,
+                product.serial_number,
+            )
             for product in challan.products
         ],
     )
@@ -215,5 +227,84 @@ async def create_challan(request: Request, challan: ChallanIn):
     challan_details["products"] = [
         ProductDB(challan_id=inserted_challan["id"], **dict(product)) for product in challan.products
     ]
-    request.app.state.cache.challans.append(ChallanCache(**challan_details))
+    request.app.state.cache.challans.insert(0, ChallanCache(**challan_details))
     return GeneralResponse(message="Challan created")
+
+
+@router.patch(
+    "/challans/{id}",
+    responses={
+        200: {"model": ChallanCache},
+        404: {"detail": "Challan not found"},
+        400: {"detail": "Bad request"},
+    },
+    status_code=200,
+    response_model=ChallanCache,
+)
+async def update_challan(request: Request, id: int, new_challan: ChallanUpdate):
+    """Update a challan by its id. Products will be replaced"""
+    challans: List[ChallanCache] = [challan for challan in request.app.state.cache.challans if challan.id == id]
+    if not challans:
+        raise HTTPException(status_code=404, detail="Challan not found")
+    challan: ChallanCache = challans[0]
+
+    new_data = new_challan.dict(exclude_unset=True)
+    if not new_data:
+        raise HTTPException(status_code=400, detail="No data to update")
+
+    if "products" in new_data:
+        new_data["products"] = [{**product, "challan_id": id} for product in new_data["products"]]
+
+    async with request.app.state.db.acquire() as connection:
+        async with connection.transaction():
+            products = new_data.pop("products", None)
+            if products is not None:
+                if products == []:
+                    raise HTTPException(status_code=400, detail="Must have at least one product")
+
+                await connection.execute("""DELETE FROM products WHERE challan_id=$1;""", id)
+                await connection.executemany(
+                    """
+                    INSERT INTO products(description, quantity, comments, serial_number, challan_id) 
+                    VALUES ($1, $2, $3, $4, $5);
+                """,
+                    [
+                        (
+                            product["description"],
+                            product["quantity"],
+                            product.get("comments", None),
+                            product.get("serial_number", None),
+                            id,
+                        )
+                        for product in products
+                    ],
+                )
+
+            if new_data:
+                try:
+                    await connection.execute(
+                        """UPDATE challans SET {} WHERE id = $1;""".format(
+                            ", ".join(f"{key} = ${idx + 2}" for idx, key in enumerate(new_data.keys()))
+                        ),
+                        id,
+                        *new_data.values(),
+                    )
+                except asyncpg.ForeignKeyViolationError:
+                    raise HTTPException(status_code=400, detail="Buyer doesn't exist")
+            
+            if products:
+                new_data['products'] = [ProductDB(**product) for product in products]
+
+    if "buyer_id" in new_data:
+        new_data["buyer"] = [
+            buyer for buyer in request.app.state.cache.buyers.values() if buyer.id == new_data["buyer_id"]
+        ][0]
+
+    updated_challan = challan.copy(update=new_data)
+
+    for index, challan in enumerate(request.app.state.cache.challans):
+        if challan.id == id:
+            request.app.state.cache.challans[index] = updated_challan
+            break
+
+    return updated_challan
