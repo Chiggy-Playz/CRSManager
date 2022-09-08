@@ -14,7 +14,7 @@ class Cache:
         self.challans = []
 
         query = """
-            SELECT {} FROM challans c JOIN products p ON c.id = p.challan_id JOIN buyers b ON c.buyer_id = b.id;
+            SELECT {} FROM challans c JOIN products p ON c.id = p.challan_id JOIN buyers b ON c.buyer_id = b.id ORDER BY c.created_at DESC;
         """.format(
             ", ".join(
                 [f'b.{buyer_field} AS "b.{buyer_field}"' for buyer_field in BuyerDB.__fields__]
