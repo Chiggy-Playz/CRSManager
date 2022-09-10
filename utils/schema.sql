@@ -1,8 +1,9 @@
 CREATE TABLE IF NOT EXISTS buyers (
     id SERIAL PRIMARY KEY,
-    name TEXT NOT NULL,
+    name TEXT UNIQUE NOT NULL, 
     address TEXT NOT NULL,
     state TEXT NOT NULL,
+    alias TEXT NOT NULL DEFAULT '',
     gst TEXT
 );
 

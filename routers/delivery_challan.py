@@ -61,11 +61,12 @@ async def create_buyer(request: Request, buyer: BuyerIn):
     """Create a new buyer"""
     try:
         buyer_id = await request.app.state.db.fetchval(
-            """INSERT INTO buyers(name, address, state, gst) VALUES ($1, $2, $3, $4) RETURNING id;""",
+            """INSERT INTO buyers(name, address, state, gst, alias) VALUES ($1, $2, $3, $4, $5) RETURNING id;""",
             buyer.name,
             buyer.address,
             buyer.state,
             buyer.gst,
+            buyer.alias
         )
     except asyncpg.UniqueViolationError:
         raise HTTPException(status_code=400, detail="Buyer already exists")
@@ -114,11 +115,12 @@ async def update_buyer(request: Request, id: int, input_buyer: BuyerIn):
         raise HTTPException(status_code=404, detail="Buyer not found")
     buyer = buyer[0]
     await request.app.state.db.execute(
-        """UPDATE buyers SET name = $1, address = $2, state = $3, gst = $4 WHERE id = $5;""",
+        """UPDATE buyers SET name = $1, address = $2, state = $3, gst = $4, alias = $5 WHERE id = $6;""",
         input_buyer.name,
         input_buyer.address,
         input_buyer.state,
         input_buyer.gst,
+        input_buyer.alias,
         id,
     )
     new_buyer_info = dict(input_buyer)

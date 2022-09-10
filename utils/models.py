@@ -14,15 +14,15 @@ class BuyerIn(BaseModel):
     address: str
     state: str
     gst: Optional[str] = None
-
+    alias: str = ""
 
 class BuyerDB(BaseModel):
     id: int
     name: str
     address: str
     state: str
+    alias: str
     gst: Optional[str] = None
-
 
 class ProductIn(BaseModel):
     description: str
@@ -49,6 +49,7 @@ class ChallanCache(ChallanDB):
     buyer: BuyerDB
     products: List[ProductDB]
 
+# Cancelled and received not taken since the challan is just created
 class ChallanIn(BaseModel):
     number: int
     session: str
