@@ -186,7 +186,7 @@ async def get_new_challan_info(request: Request):
 @router.post(
     "/challans",
     status_code=201,
-    response_model=GeneralResponse,
+    response_model=ChallanCache,
 )
 async def create_challan(request: Request, challan: ChallanIn):
     """Create a new challan"""
@@ -229,8 +229,9 @@ async def create_challan(request: Request, challan: ChallanIn):
     challan_details["products"] = [
         ProductDB(challan_id=inserted_challan["id"], **dict(product)) for product in challan.products
     ]
-    request.app.state.cache.challans.insert(0, ChallanCache(**challan_details))
-    return GeneralResponse(message="Challan created")
+    new_challan = ChallanCache(**challan_details)
+    request.app.state.cache.challans.insert(0, new_challan)
+    return new_challan
 
 
 @router.patch(
