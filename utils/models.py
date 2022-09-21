@@ -60,7 +60,7 @@ class ChallanIn(BaseModel):
     vehicle_number: str
     digitally_signed: bool
     products: List[ProductIn]
-    product_value: int
+    product_value: int = 0
     notes: str = ''
 
 class ChallanUpdate(BaseModel):
@@ -73,8 +73,8 @@ class ChallanUpdate(BaseModel):
     digitally_signed: Optional[bool] = None
     cancelled: Optional[bool] = None
     products: Optional[List[ProductIn]] = None
-    product_value: str
-    notes: str
+    product_value: Optional[int] = None
+    notes: Optional[str] = None
 
 class NewChallanInfo(BaseModel):
     number: int
