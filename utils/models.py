@@ -44,6 +44,8 @@ class ChallanDB(BaseModel):
     created_at: datetime.datetime
     cancelled: bool = False
     digitally_signed: bool
+    product_value: int
+    notes: str
 
 class ChallanCache(ChallanDB):
     buyer: BuyerDB
@@ -58,6 +60,8 @@ class ChallanIn(BaseModel):
     vehicle_number: str
     digitally_signed: bool
     products: List[ProductIn]
+    product_value: int
+    notes: str = ''
 
 class ChallanUpdate(BaseModel):
     number: Optional[int] = None
@@ -69,6 +73,8 @@ class ChallanUpdate(BaseModel):
     digitally_signed: Optional[bool] = None
     cancelled: Optional[bool] = None
     products: Optional[List[ProductIn]] = None
+    product_value: str
+    notes: str
 
 class NewChallanInfo(BaseModel):
     number: int

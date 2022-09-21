@@ -197,14 +197,16 @@ async def create_challan(request: Request, challan: ChallanIn):
     buyer = buyer[0]
     try:
         inserted_challan = await request.app.state.db.fetchrow(
-            """INSERT INTO challans(number, session, buyer_id, delivered_by, vehicle_number, digitally_signed) 
-            VALUES ($1, $2, $3, $4, $5, $6) RETURNING *;""",
+            """INSERT INTO challans(number, session, buyer_id, delivered_by, vehicle_number, digitally_signed, product_value, notes) 
+            VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *;""",
             challan.number,
             challan.session,
             challan.buyer_id,
             challan.delivered_by,
             challan.vehicle_number,
             challan.digitally_signed,
+            challan.product_value,
+            challan.notes
         )
     except asyncpg.UniqueViolationError:
         raise HTTPException(status_code=400, detail="A challan of same number and session exists.")

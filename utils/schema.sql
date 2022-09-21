@@ -14,7 +14,9 @@ CREATE TABLE IF NOT EXISTS challans(
     created_at TIMESTAMP WITHOUT TIME ZONE NOT NULL DEFAULT TIMEZONE('UTC', NOW()),
     buyer_id INT NOT NULL,
     cancelled BOOLEAN NOT NULL DEFAULT FALSE,
-
+    product_value INT NOT NULL,
+    notes TEXT NOT NULL DEFAULT '',
+    
     -- Transportation details
     delivered_by TEXT NOT NULL,
     vehicle_number TEXT NOT NULL,
