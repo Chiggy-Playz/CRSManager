@@ -103,11 +103,11 @@ async def delete_buyer(request: Request, id: int):
 @router.put(
     "/buyers/{id}",
     responses={
-        200: {"model": GeneralResponse},
+        200: {"model": BuyerDB},
         404: {"detail": "Buyer not found"},
     },
     status_code=200,
-    response_model=GeneralResponse,
+    response_model=BuyerDB,
 )
 async def update_buyer(request: Request, id: int, input_buyer: BuyerIn):
     """Update a buyer"""
@@ -127,9 +127,10 @@ async def update_buyer(request: Request, id: int, input_buyer: BuyerIn):
     new_buyer_info = dict(input_buyer)
     new_buyer_info["id"] = id
     del request.app.state.cache.buyers[buyer.name]
-    request.app.state.cache.buyers[input_buyer.name] = BuyerDB(**new_buyer_info)
+    edited_buyer = BuyerDB(**new_buyer_info)
+    request.app.state.cache.buyers[input_buyer.name] = edited_buyer
 
-    return GeneralResponse(message="Buyer updated")
+    return edited_buyer
 
 
 @router.get(
