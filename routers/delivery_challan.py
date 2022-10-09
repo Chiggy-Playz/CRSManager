@@ -72,8 +72,9 @@ async def create_buyer(request: Request, buyer: BuyerIn):
         raise HTTPException(status_code=400, detail="Buyer already exists")
     buyer_details = dict(buyer)
     buyer_details["id"] = buyer_id
-    request.app.state.cache.buyers[buyer.name] = BuyerDB(**buyer_details)
-    return GeneralResponse(message="Buyer created")
+    new_buyer = BuyerDB(**buyer_details)
+    request.app.state.cache.buyers[buyer.name] = new_buyer
+    return new_buyer
 
 
 @router.delete(
