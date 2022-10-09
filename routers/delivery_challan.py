@@ -51,11 +51,11 @@ async def get_buyer(request: Request, id: int):
 @router.post(
     "/buyers",
     responses={
-        201: {"model": GeneralResponse},
+        201: {"model": BuyerDB},
         400: {"detail": "Buyer already exists"},
     },
     status_code=201,
-    response_model=GeneralResponse,
+    response_model=BuyerDB,
 )
 async def create_buyer(request: Request, buyer: BuyerIn):
     """Create a new buyer"""
