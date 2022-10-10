@@ -92,10 +92,13 @@ async def delete_buyer(request: Request, id: int):
     if not buyer:
         raise HTTPException(status_code=404, detail="Buyer not found")
     buyer = buyer[0]
-    await request.app.state.db.execute(
-        """DELETE FROM buyers WHERE id = $1;""",
-        buyer.id,
-    )
+    try:
+        await request.app.state.db.execute(
+            """DELETE FROM buyers WHERE id = $1;""",
+            buyer.id,
+        )
+    except asyncpg.ForeignKeyViolationError:
+        raise HTTPException(status_code=403, detail="Challans with this buyer exist. Buyer cannot be deleted.")
     del request.app.state.cache.buyers[buyer.name]
     return GeneralResponse(message="Buyer deleted")
 
