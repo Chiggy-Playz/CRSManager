@@ -5,7 +5,6 @@ from pydantic import BaseModel
 
 
 class GeneralResponse(BaseModel):
-
     message: str
 
 
@@ -31,7 +30,7 @@ class ProductIn(BaseModel):
     serial_number: Optional[str] = None
 
 class ProductDB(ProductIn):
-    challan_id: int
+    challan_id: int 
 
 class ChallanDB(BaseModel):
     id: int

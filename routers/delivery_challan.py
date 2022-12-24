@@ -132,7 +132,7 @@ async def update_buyer(request: Request, id: int, input_buyer: BuyerIn):
     del request.app.state.cache.buyers[buyer.name]
     edited_buyer = BuyerDB(**new_buyer_info)
     request.app.state.cache.buyers[input_buyer.name] = edited_buyer
-
+    request.app.state.cache.challans = [ChallanCache(**challan, buyer=challan.buyer if challan.buyer.id != id else edited_buyer) for challan in request.app.state.cache.challans]
     return edited_buyer
 
 

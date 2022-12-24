@@ -1,7 +1,5 @@
 from fastapi import FastAPI
-import asyncio
 import asyncpg
-from typing import Optional
 import toml
 
 from utils.classes import Cache
