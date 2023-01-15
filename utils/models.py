@@ -7,15 +7,22 @@ from pydantic import BaseModel
 class GeneralResponse(BaseModel):
     message: str
 
+class MyBaseModel(BaseModel):
 
-class BuyerIn(BaseModel):
+    def __getattribute__(self, __name: str):
+        value = super().__getattribute__(__name)
+        if isinstance(value, str):
+            return value.upper()
+        return value
+
+class BuyerIn(MyBaseModel):
     name: str
     address: str
     state: str
     gst: Optional[str] = None
     alias: str = ""
 
-class BuyerDB(BaseModel):
+class BuyerDB(MyBaseModel):
     id: int
     name: str
     address: str
@@ -23,7 +30,7 @@ class BuyerDB(BaseModel):
     alias: str
     gst: Optional[str] = None
 
-class ProductIn(BaseModel):
+class ProductIn(MyBaseModel):
     description: str
     quantity: int
     comments: Optional[str] = None
@@ -32,7 +39,7 @@ class ProductIn(BaseModel):
 class ProductDB(ProductIn):
     challan_id: int 
 
-class ChallanDB(BaseModel):
+class ChallanDB(MyBaseModel):
     id: int
     number: int
     session: str
@@ -51,7 +58,7 @@ class ChallanCache(ChallanDB):
     products: List[ProductDB]
 
 # Cancelled and received not taken since the challan is just created
-class ChallanIn(BaseModel):
+class ChallanIn(MyBaseModel):
     number: int
     session: str
     buyer_id: int
@@ -62,7 +69,7 @@ class ChallanIn(BaseModel):
     product_value: int = 0
     notes: str = ''
 
-class ChallanUpdate(BaseModel):
+class ChallanUpdate(MyBaseModel):
     number: Optional[int] = None
     session: Optional[str] = None
     buyer_id: Optional[int] = None
@@ -75,6 +82,6 @@ class ChallanUpdate(BaseModel):
     product_value: Optional[int] = None
     notes: Optional[str] = None
 
-class NewChallanInfo(BaseModel):
+class NewChallanInfo(MyBaseModel):
     number: int
     session: str
